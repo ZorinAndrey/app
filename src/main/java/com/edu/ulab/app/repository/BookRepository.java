@@ -7,10 +7,13 @@ import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.LockModeType;
 import java.util.Optional;
+import java.util.Set;
 
 public interface BookRepository extends CrudRepository<Book, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Book b where b.id = :id")
     Optional<Book> findByIdForUpdate(long id);
+
+    Set<Book> findAllByPersonId(Long userId);
 }

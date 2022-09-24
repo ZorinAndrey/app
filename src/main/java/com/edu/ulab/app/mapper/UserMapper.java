@@ -5,11 +5,12 @@ import com.edu.ulab.app.entity.Person;
 import com.edu.ulab.app.web.request.UserRequest;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = BookMapper.class)
 public interface UserMapper {
     UserDto userRequestToUserDto(UserRequest userRequest);
 
     UserRequest userDtoToUserRequest(UserDto userDto);
+
 
     Person userDtoToPerson(UserDto userDto);
 

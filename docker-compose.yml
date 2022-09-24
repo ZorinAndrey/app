@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres-auth:
+    image: postgres:14.2
+    environment:
+      - POSTGRES_DB=userbook
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "postgres" ]
+      interval: 5s
+      timeout: 1s
+      retries: 2
