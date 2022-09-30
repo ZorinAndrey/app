@@ -8,28 +8,23 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "book")
+@Table(name = "book", schema = "ulab_edu")
 public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    @SequenceGenerator(name = "sequence", sequenceName = "sequence", allocationSize = 100)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Person person;
-    @Column(name = "title")
-    private String title;
-    @Column(name = "author")
-    private String author;
-    @Column(name = "page_count")
-    private long pageCount;
 
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", pageCount=" + pageCount +
-                '}';
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false)
+    private Person person;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String author;
+
+    @Column(nullable = false)
+    private long pageCount;
 }

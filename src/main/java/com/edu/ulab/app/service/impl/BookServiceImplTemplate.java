@@ -5,7 +5,6 @@ import com.edu.ulab.app.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
@@ -21,31 +20,40 @@ public class BookServiceImplTemplate implements BookService {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private Long getNextId(){
+        return jdbcTemplate.query("SELECT nextval('sequence')",
+                rs -> {
+                    if (rs.next()) {
+                        return rs.getLong(1) + 100;
+                    } else {
+                        throw new SQLException("Unable to retrieve value from sequence sequence.");
+                    }
+                });
+    }
+
     @Override
     public BookDto createBook(BookDto bookDto) {
-        final String INSERT_SQL = "INSERT INTO BOOK(TITLE, AUTHOR, PAGE_COUNT, PERSON_ID) VALUES (?,?,?,?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        final String INSERT_SQL = "INSERT INTO ULAB_EDU.BOOK(ID, TITLE, AUTHOR, PAGE_COUNT, PERSON_ID) VALUES (?,?,?,?,?)";
+        Long id = getNextId();
         jdbcTemplate.update(
-                new PreparedStatementCreator() {
-                    public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                        PreparedStatement ps =
-                                connection.prepareStatement(INSERT_SQL, new String[]{"id"});
-                        ps.setString(1, bookDto.getTitle());
-                        ps.setString(2, bookDto.getAuthor());
-                        ps.setLong(3, bookDto.getPageCount());
-                        ps.setLong(4, bookDto.getUserId());
-                        return ps;
-                    }
-                },
-                keyHolder);
+                connection -> {
+                    PreparedStatement ps =
+                            connection.prepareStatement(INSERT_SQL, new String[]{"id"});
+                    ps.setLong(1, id);
+                    ps.setString(2, bookDto.getTitle());
+                    ps.setString(3, bookDto.getAuthor());
+                    ps.setLong(4, bookDto.getPageCount());
+                    ps.setLong(5, bookDto.getUserId());
+                    return ps;
+                });
 
-        bookDto.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+        bookDto.setId(id);
         return bookDto;
     }
 
     @Override
     public BookDto updateBook(BookDto bookDto) {
-        final String UPDATE_SQL = "UPDATE BOOK SET TITLE = ?, AUTHOR = ?, PAGE_COUNT = ?, PERSON_ID = ? WHERE ID = ?";
+        final String UPDATE_SQL = "UPDATE ULAB_EDU.BOOK SET TITLE = ?, AUTHOR = ?, PAGE_COUNT = ?, PERSON_ID = ? WHERE ID = ?";
         jdbcTemplate.update(
                 connection -> {
                     PreparedStatement ps = connection.prepareStatement(UPDATE_SQL);
@@ -66,7 +74,7 @@ public class BookServiceImplTemplate implements BookService {
 
     @Override
     public BookDto getBookById(Long id) {
-        final String SELECT_SQL = "SELECT * FROM BOOK WHERE ID = ?";
+        final String SELECT_SQL = "SELECT * FROM ULAB_EDU.BOOK WHERE ID = ?";
         return jdbcTemplate.queryForObject(SELECT_SQL, (rs, rowNum) -> {
             BookDto bookDto = new BookDto();
             bookDto.setId(id);
@@ -81,7 +89,7 @@ public class BookServiceImplTemplate implements BookService {
 
     @Override
     public Set<BookDto> getAllBooksByUserId(Long userId) {
-        final String SELECT_BOOKS_BY_USER_ID_SQL = "SELECT * FROM BOOK WHERE PERSON_ID = ?";
+        final String SELECT_BOOKS_BY_USER_ID_SQL = "SELECT * FROM ULAB_EDU.BOOK WHERE PERSON_ID = ?";
         return Set.copyOf(jdbcTemplate.query(
                 SELECT_BOOKS_BY_USER_ID_SQL,
                 (rs, rowNum) -> {
@@ -99,7 +107,7 @@ public class BookServiceImplTemplate implements BookService {
     @Override
     public Set<BookDto> getAllBooksByIdSet(Set<Long> idSet) {
         List<String> idStringList = idSet.stream().map(String::valueOf).collect(Collectors.toList());
-        final String SELECT_BOOKS_SQL = String.format("SELECT * FROM BOOK WHERE ID IN (%s)", String.join(",", idStringList));
+        final String SELECT_BOOKS_SQL = String.format("SELECT * FROM ULAB_EDU.BOOK WHERE ID IN (%s)", String.join(",", idStringList));
         List<BookDto> bookDtoList = jdbcTemplate.query(
                 SELECT_BOOKS_SQL,
                 (rs, rowNum) -> {
@@ -117,7 +125,7 @@ public class BookServiceImplTemplate implements BookService {
 
     @Override
     public void deleteBookById(Long id) {
-        final String DELETE_SQL = "DELETE FROM BOOK WHERE ID = ?";
+        final String DELETE_SQL = "DELETE FROM ULAB_EDU.BOOK WHERE ID = ?";
         int rows = jdbcTemplate.update(DELETE_SQL, id);
         log.info("Removed {} rows from BOOK", rows);
     }

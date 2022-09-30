@@ -3,6 +3,7 @@ package com.edu.ulab.app.mapper;
 import com.edu.ulab.app.dto.BookDto;
 import com.edu.ulab.app.entity.Book;
 import com.edu.ulab.app.entity.Person;
+import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.service.UserService;
 import com.edu.ulab.app.web.request.BookRequest;
 import org.mapstruct.*;
@@ -25,7 +26,7 @@ public interface BookMapper {
     @Named(value = "userIdToPerson")
     default Person userIdToPerson(Long personId, @Context UserService userService) {
         if (personId == null) {
-            return null;
+            throw new NotFoundException("Null given personId");
         }
         return userService.getPersonById(personId);
     }
@@ -33,7 +34,7 @@ public interface BookMapper {
     @Named(value = "personToUserId")
     default Long personToUserId(Person person) {
         if (person == null) {
-            return null;
+            throw new NotFoundException("Null given person");
         }
         return person.getId();
     }

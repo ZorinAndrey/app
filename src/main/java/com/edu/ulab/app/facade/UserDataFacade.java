@@ -75,10 +75,7 @@ public class UserDataFacade {
         log.info("Updated user: {}", updatedUser);
 
         bookService.getAllBooksByUserId(updatedUser.getId())
-                .forEach(bookDto -> {
-                    bookDto.setUserId(null);
-                    bookService.updateBook(bookDto);
-                });
+                .forEach(bookDto -> bookService.deleteBookById(bookDto.getId()));
 
         List<Long> bookIdList = userBookRequest.getBookRequests()
                 .stream()
@@ -130,10 +127,9 @@ public class UserDataFacade {
     public void deleteUserWithBooks(Long userId) {
         log.info("Got delete user with books request by id: {}", userId);
         bookService.getAllBooksByUserId(userId)
-                .forEach(bookDto -> {
-                    bookDto.setUserId(null);
-                    bookService.updateBook(bookDto);
-                });
+                .forEach(bookDto ->
+                    bookService.deleteBookById(bookDto.getId())
+                );
         userService.deleteUserById(userId);
     }
 }
