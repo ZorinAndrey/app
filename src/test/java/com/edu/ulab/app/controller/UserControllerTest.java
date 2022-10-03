@@ -53,11 +53,13 @@ public class UserControllerTest {
     @BeforeAll
     public static void initEntities() {
         userRequest = new UserRequest();
+        userRequest.setId(1L);
         userRequest.setAge(33);
         userRequest.setFullName("test name");
         userRequest.setTitle("test title");
 
         bookRequest = new BookRequest();
+        bookRequest.setId(1L);
         bookRequest.setAuthor("test author");
         bookRequest.setTitle("test book title");
         bookRequest.setPageCount(1000);
@@ -67,9 +69,8 @@ public class UserControllerTest {
         request.setBookRequests(List.of(bookRequest));
 
         response = UserBookResponse.builder()
-                .userId(userRequest.getId())
-                .booksIdList(request.getBookRequests().stream()
-                        .map(BookRequest::getId).collect(Collectors.toList()))
+                .userId(1L)
+                .booksIdList(List.of(1L))
                 .build();
     }
 
@@ -77,6 +78,9 @@ public class UserControllerTest {
     @DisplayName("Создание юзера с книгами. Должно пройти успешно.")
     public void createUserWithBooksTest() throws Exception {
         //given
+        userRequest.setId(null);
+        bookRequest.setId(null);
+
         given(userDataFacade.createUserWithBooks(request)).willReturn(response);
 
         //when
@@ -94,9 +98,6 @@ public class UserControllerTest {
     @DisplayName("Обновление юзера с книгами. Должно пройти успешно.")
     public void updateUserWithBooksTest() throws Exception {
         //given
-        userRequest.setId(1L);
-        bookRequest.setId(1L);
-
         given(userDataFacade.updateUserWithBooks(request)).willReturn(response);
 
         //when
@@ -114,10 +115,7 @@ public class UserControllerTest {
     @DisplayName("Получение юзера с книгами. Должно пройти успешно.")
     public void getUserWithBooksTest() throws Exception {
         //given
-        userRequest.setId(1L);
-        bookRequest.setId(1L);
-
-        Long userId = userRequest.getId();
+        Long userId = 1L;
         given(userDataFacade.getUserWithBooks(userId)).willReturn(response);
 
         //when
@@ -136,17 +134,7 @@ public class UserControllerTest {
     @DisplayName("Удаление юзера с книгами. Должно пройти успешно.")
     public void deleteUserWithBooksTest() throws Exception {
         //given
-        userRequest.setId(1L);
-        bookRequest.setId(1L);
-
-        Long userId = userRequest.getId();
-
-        try {
-            userDataFacade.deleteUserWithBooks(userId);
-            assertTrue(true);
-        } catch (Exception e) {
-            fail();
-        }
+        Long userId = 1L;
 
         //when
         mvc.perform(delete(WebConstant.VERSION_URL + "/user/delete/" + userId)
