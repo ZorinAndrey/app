@@ -87,9 +87,7 @@ public class UserController {
     @DeleteMapping(value = "/delete/{userId}")
     @Operation(summary = "Delete user book row.",
             responses = {
-                    @ApiResponse(description = "User book",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = UserBookResponse.class)))
+                    @ApiResponse(description = "OK", responseCode = "200")
                     ,
                     @ApiResponse(
                             description = "Ошибка", responseCode = "400",

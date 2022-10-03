@@ -1,0 +1,1 @@
+alter table ulab_edu.person add column count integer not null default 0;
