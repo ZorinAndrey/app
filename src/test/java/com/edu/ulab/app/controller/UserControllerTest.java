@@ -18,10 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,31 +39,43 @@ public class UserControllerTest {
     @MockBean
     private UserDataFacade userDataFacade;
 
-    private static UserBookRequest request;
+    private static UserBookRequest createRequest;
 
-    private static UserRequest userRequest;
-
-    private static BookRequest bookRequest;
+    private static UserBookRequest updateRequest;
 
     private static UserBookResponse response;
 
     @BeforeAll
     public static void initEntities() {
-        userRequest = new UserRequest();
-        userRequest.setId(1L);
-        userRequest.setAge(33);
-        userRequest.setFullName("test name");
-        userRequest.setTitle("test title");
+        UserRequest createUserRequest = new UserRequest();
+        createUserRequest.setAge(33);
+        createUserRequest.setFullName("test name");
+        createUserRequest.setTitle("test title");
 
-        bookRequest = new BookRequest();
-        bookRequest.setId(1L);
-        bookRequest.setAuthor("test author");
-        bookRequest.setTitle("test book title");
-        bookRequest.setPageCount(1000);
+        BookRequest createBookRequest = new BookRequest();
+        createBookRequest.setAuthor("test author");
+        createBookRequest.setTitle("test book title");
+        createBookRequest.setPageCount(1000);
 
-        request = new UserBookRequest();
-        request.setUserRequest(userRequest);
-        request.setBookRequests(List.of(bookRequest));
+        createRequest = new UserBookRequest();
+        createRequest.setUserRequest(createUserRequest);
+        createRequest.setBookRequests(List.of(createBookRequest));
+
+        UserRequest updateUserRequest = new UserRequest();
+        updateUserRequest.setId(1L);
+        updateUserRequest.setAge(44);
+        updateUserRequest.setFullName("new name");
+        updateUserRequest.setTitle("new title");
+
+        BookRequest updateBookRequest = new BookRequest();
+        updateBookRequest.setId(1L);
+        updateBookRequest.setAuthor("new author");
+        updateBookRequest.setTitle("new book title");
+        updateBookRequest.setPageCount(999);
+
+        updateRequest = new UserBookRequest();
+        updateRequest.setUserRequest(updateUserRequest);
+        updateRequest.setBookRequests(List.of(updateBookRequest));
 
         response = UserBookResponse.builder()
                 .userId(1L)
@@ -78,10 +87,7 @@ public class UserControllerTest {
     @DisplayName("Создание юзера с книгами. Должно пройти успешно.")
     public void createUserWithBooksTest() throws Exception {
         //given
-        userRequest.setId(null);
-        bookRequest.setId(null);
-
-        given(userDataFacade.createUserWithBooks(request)).willReturn(response);
+        given(userDataFacade.createUserWithBooks(createRequest)).willReturn(response);
 
         //when
         mvc.perform(post(WebConstant.VERSION_URL + "/user/create")
@@ -90,7 +96,7 @@ public class UserControllerTest {
                         .content(objectMapper
                                 .writeValueAsString(response
                                 )))
-        //then
+                //then
                 .andExpect(status().isOk());
     }
 
@@ -98,7 +104,7 @@ public class UserControllerTest {
     @DisplayName("Обновление юзера с книгами. Должно пройти успешно.")
     public void updateUserWithBooksTest() throws Exception {
         //given
-        given(userDataFacade.updateUserWithBooks(request)).willReturn(response);
+        given(userDataFacade.updateUserWithBooks(updateRequest)).willReturn(response);
 
         //when
         mvc.perform(put(WebConstant.VERSION_URL + "/user/update")
@@ -107,7 +113,7 @@ public class UserControllerTest {
                         .content(objectMapper
                                 .writeValueAsString(response
                                 )))
-        //then
+                //then
                 .andExpect(status().isOk());
     }
 
@@ -126,7 +132,7 @@ public class UserControllerTest {
                                 .writeValueAsString(response
                                 )))
 
-        //then
+                //then
                 .andExpect(status().isOk());
     }
 
@@ -140,7 +146,7 @@ public class UserControllerTest {
         mvc.perform(delete(WebConstant.VERSION_URL + "/user/delete/" + userId)
                         .header("rqid", "requestId1010101"))
 
-        //then
+                //then
                 .andExpect(status().isOk());
     }
 }
